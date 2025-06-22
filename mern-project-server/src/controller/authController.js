@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const secret ="9fbd60ec-764d-40f1-adf9-e318e807b024";
 const authController={
+
+    //---------------------------------------login function to authenticate user
     login: (request, response) =>{
         const { username, password } = request.body;
         if( username === 'admin' && password === 'admin') {

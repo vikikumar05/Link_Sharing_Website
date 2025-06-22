@@ -55,7 +55,7 @@ function Login({updateUserDetails}) {
             // we can use axios by promise and async await , we wil use async await
             const body ={
                 username: formData.username,
-                password: formData.password
+                password: formData.password 
             };
             const config={
                 withCredentials: true // this is important to send cookies with the request  // this telling the browser to include cookies in the request
@@ -97,3 +97,13 @@ function Login({updateUserDetails}) {
 
 
 export default Login;
+
+
+//  ----------------------------------------------------------Full Overview: What this app does
+// It checks if the user is already logged in.
+
+// If yes ➝ It shows Dashboard.
+
+// If not ➝ It shows Home or Login page.
+
+// It also allows you to log in, and then redirects to Dashboard

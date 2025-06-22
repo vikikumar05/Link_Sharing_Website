@@ -21,6 +21,7 @@ function App() {
   });
   updateUserDetails(response.data.user);
   };
+  
    useEffect(() => {
     isUserLoggedIn();
   }, []);
@@ -52,13 +53,18 @@ function App() {
           )
         }
       />
+   
+   <Route path="/dashboard" element={<Dashboard updateUserDetails={updateUserDetails} />} />
 
-      <Route path="/dashboard" element={<Dashboard />} />
+     
     </Routes>
   );
 }
 
 export default App;
+
+
+//change 1:-  <Route path="/dashboard" element={<Dashboard />} />
 
 
 // learned about hard refresh and lifting state up
