@@ -10,7 +10,7 @@ function Login({updateUserDetails}) {
     const [message, setMessage] = useState(null);
 
     const handleChange = (e) => {
-        const name = e.target.name;
+        const name = e.target.name;  
         const value = e.target.value;
 
         setFormData({

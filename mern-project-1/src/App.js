@@ -5,27 +5,36 @@ import Home from "./Home";
 import Login from "./Login";
 import AppLayout from "./layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
+import Logout from "./pages/Logout";  
+import Error from "./pages/Error";      
 import axios from "axios";
 
 function App() {
   const [userDetails, setUserDetails] = useState(null);
-// this is example of lifting state up
+
+  // Function to update user details in state
   const updateUserDetails = (updatedUserDetails) => {
     setUserDetails(updatedUserDetails);
   };
 
-  const isUserLoggedIn = async ()=>{
-    const response = await axios.post('http://localhost:5000/auth/isUserLoggedIn', {}, {
-      withCredentials: true // this is important to send cookies with the request
-     
-  });
-  updateUserDetails(response.data.user);
+  // Check if user is logged in (called on mount)
+  const isUserLoggedIn = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5001/auth/is-user-logged-in",
+        {},
+        { withCredentials: true }
+      );
+      updateUserDetails(response.data.user);
+    } catch (error) {
+      console.log(error);
+    }
   };
-  
-   useEffect(() => {
+
+  useEffect(() => {
     isUserLoggedIn();
   }, []);
- 
+
   return (
     <Routes>
       <Route
@@ -53,10 +62,41 @@ function App() {
           )
         }
       />
-   
-   <Route path="/dashboard" element={<Dashboard updateUserDetails={updateUserDetails} />} />
 
-     
+      <Route
+        path="/dashboard"
+        element={
+          userDetails ? (
+            <Dashboard updateUserDetails={updateUserDetails} />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+
+      <Route
+        path="/logout"
+        element={
+          userDetails ? (
+            <Logout updateUserDetails={updateUserDetails} />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+
+      <Route
+        path="/error"
+        element={
+          userDetails ? (
+            <Error />
+          ) : (
+            <AppLayout>
+              <Error />
+            </AppLayout>
+          )
+        }
+      />
     </Routes>
   );
 }
