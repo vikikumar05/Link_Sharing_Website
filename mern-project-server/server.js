@@ -1,12 +1,18 @@
+require('dotenv').config(); // to load environment variables from .env file
 const express = require('express');
+const mongoose = require('mongoose');
 const authRoutes = require('./src/routes/authRoutes');
 const cookieParser = require('cookie-parser'); // to parse cookies from request
 const cors = require('cors'); // to handle CORS issues
+
+mongoose.connect(process.env.MONGO_URL, )
+.then(()=> console.log('MongoDB is Connected Putar!!'))
+.catch((error)=>console.log(error));
 const app = express();
 app.use(express.json()); // middleware to parse JSON bodies or take requests and convert them to js objects
 app.use(cookieParser()); // middleware to parse cookies
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: process.env.CLIENT_ENDPOINT, // this the way to use .env file ,,,earlier we where just writting the url http://localhost:3000
     credentials: true
 };
 app.use(cors(corsOptions));

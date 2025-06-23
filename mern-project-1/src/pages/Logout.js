@@ -14,7 +14,7 @@ const handleLogout = async ()=>{
      updateUserDetails(null); // Clear user state
 
  }catch (error) {
-     console.error('Logout failed:', error);
+     console.error('Logout faicled:', error);
      navigate('/error')
  }
 };
