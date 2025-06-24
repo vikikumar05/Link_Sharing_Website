@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Users = require('../model/Users');
 const bcrypt = require('bcryptjs');
+const {OAuth2Client} = require('google-auth-library');
 
 const secret = "9fbd60ec-764d-40f1-adf9-e318e807b024";
 
@@ -98,6 +99,56 @@ const authController = {
               return response.status(500).json({ error: 'Internal server error' });
         }
 
+    },
+
+    //-------------------------------------------------------Google Authentication  (OAUTH and OCID)
+
+    googleAuth: async (request,response) =>{
+        try{
+                const {idToken} = request.body;
+                if(!idToken){
+                    return response.status(401).json
+                }
+                const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+                const googleResponse = await googleClient.verifyIdToken({
+                    idToken:idToken,
+                    audience: process.env.GOOGLE_CLIENT_ID
+
+                });
+
+                const payload = googleResponse.getPayload();
+                const {sub: googleId,name,email} = payload;
+
+                let data= await Users.findOne({email:email});
+                if(!data){
+                    data = new Users({
+                        email:email,
+                        name:name,
+                        isGoogleUser:true,
+                        googleId: googleId
+                    });
+                    await data.save();
+                }
+                const user = {
+                    id: data._id? data._id:googleId,
+                    username:email,
+                    name:name
+                };
+                const token = jwt.sign(user,secret,{
+                    expiresIn:'1h'
+                });
+                response.cookie('jwtToken',token,{
+                    httpOnly:true,
+                    secure:true,
+                    domain:'localhost',
+                    path:'/'
+                });
+                response.json({user:user,message:'User authenticated'});
+
+        }catch(e){
+            console.log(e);
+            return response.status(500).json({message:'Internal server error'});
+        }
     },
     
 };

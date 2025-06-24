@@ -1,7 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
+import {GoogleOAuthProvider,GoogleLogin} from '@react-oauth/google';
+import {useNavigate} from "react-router-dom";
 
 function Login({updateUserDetails}) {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
         password: ''
@@ -72,6 +75,29 @@ function Login({updateUserDetails}) {
         }
     };
 
+    const handleGoogleSuccess = async (authResponse) =>{
+
+        try{
+            const response=await axios.post('http://localhost:5000/auth/google-auth',{
+                idToken : authResponse.credential
+            },{
+                withCredentials: true
+            });
+            updateUserDetails(response.data.user);
+             navigate("/dashboard");
+
+        }catch(e){
+            console.log(e);
+            setErrors({message:"Error processing the google auth, try again"})
+        }
+                    
+    };
+
+    const handleGoogleError = async (error)=>{
+        console.log(error);
+        setErrors({message: "Error in googl authorization flow, try again"})
+    }
+
     return (
         <div className="container text-center">
             {message && (message)}
@@ -91,6 +117,10 @@ function Login({updateUserDetails}) {
                     <button>Submit</button>
                 </div>
             </form>
+            <h1>OR</h1>
+            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError}/>
+            </GoogleOAuthProvider>
         </div>
     );
 }
