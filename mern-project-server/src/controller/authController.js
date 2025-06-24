@@ -71,7 +71,7 @@ const authController = {
         });
     },
 
-    //---------------------reger method
+    //---------------------Register end point method
 
     register: async (request, response) => {
         try{

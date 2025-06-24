@@ -7,6 +7,7 @@ import AppLayout from "./layout/AppLayout";
 import Logout from "./pages/Logout";  
 import Error from "./pages/Error";  
 import Dashboard from "./pages/Dashboard";
+import Register from "./Register";
 import axios from "axios";
 
 function App() {
@@ -108,6 +109,19 @@ function App() {
           )
         }
       />
+
+      <Route
+      path="/register"
+      element={
+      userDetails ? (
+      <Navigate to="/dashboard" />
+    ) : (
+      <AppLayout>
+        <Register />
+      </AppLayout>
+    )
+  }
+/>
 
    
 
