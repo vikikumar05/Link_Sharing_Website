@@ -12,11 +12,11 @@ const authController = {
              console.log(username, password);
             // Find user by email (username)
             const data = await Users.findOne({ email: username });
-            console.log(data);
+
             if (!data) {
                 return response.status(401).json({ message: 'Invalid credentials' });
             }
-             console.log(data);
+             
 
             // Compare hashed password
             const isMatch = await bcrypt.compare(password, data.password);
@@ -69,7 +69,37 @@ const authController = {
                 return response.status(200).json({ user: user, message: 'User is logged in' });
             }
         });
-    }
+    },
+
+    //---------------------reger method
+
+    register: async (request, response) => {
+        try{
+            
+            const {username,password,name} = request.body;
+            const data = await Users.findOne({email: username});
+            if(data){
+                return response.status(401).json({ message: 'User already exists' });
+            }
+            // Hash the password, before savinng it to dtatbase
+            const encryptedPassword = await bcrypt.hash(password, 10);
+        
+            // creating user object to save it on data base or creteing a mongoose model object and set the record values
+            const user = new Users({
+                email: username,
+                password: encryptedPassword,
+                name : name
+            });
+            await user.save();
+            response.status(201).json({ message: 'User registered successfully' });
+
+        }catch(error){
+              console.log(error);
+              return response.status(500).json({ error: 'Internal server error' });
+        }
+
+    },
+    
 };
 
 module.exports = authController;
