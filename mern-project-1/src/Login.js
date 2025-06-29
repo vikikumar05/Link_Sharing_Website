@@ -1,10 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
-import {GoogleOAuthProvider,GoogleLogin} from '@react-oauth/google';
-import {useNavigate} from "react-router-dom";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { useNavigate } from "react-router-dom";
+import { serverEndpoint } from "./config";
+import { useDispatch } from "react-redux";
+import { SET_USER } from "./redux/user/actions";
 
-function Login({updateUserDetails}) {
-    const navigate = useNavigate();
+function Login() {
+    // const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         username: '',
         password: ''
@@ -13,7 +17,7 @@ function Login({updateUserDetails}) {
     const [message, setMessage] = useState(null);
 
     const handleChange = (e) => {
-        const name = e.target.name;  
+        const name = e.target.name;
         const value = e.target.value;
 
         setFormData({
@@ -39,7 +43,7 @@ function Login({updateUserDetails}) {
         setErrors(newErrors);
         return isValid;
     };
-//----------------------------------here we are going to add our server end points  going to use axios to make the api calls
+    //----------------------------------here we are going to add our server end points  going to use axios to make the api calls
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -56,46 +60,56 @@ function Login({updateUserDetails}) {
             // }
 
             // we can use axios by promise and async await , we wil use async await
-            const body ={
+            const body = {
                 username: formData.username,
-                password: formData.password 
+                password: formData.password
             };
-            const config={
+            const config = {
                 withCredentials: true // this is important to send cookies with the request  // this telling the browser to include cookies in the request
             };
-             try{
-                const response = await axios.post('http://localhost:5000/auth/login',body,config); // This make sure that cookies are sent with the request // response varible will contain the response from the server, same response which we have seen in postman
-          
-             updateUserDetails(response.data.user); // update the user details in the App component
-               console.log(response.data);
-            }catch(error) {
-              console.log(error);
-              setErrors({message: 'something went wrong'});
-        }
+            try {
+                const response = await axios.post(`${serverEndpoint}/auth/login`, body, config);
+
+                dispatch({
+                    type: SET_USER,
+                    payload: response.data.user
+                });
+
+                console.log(response.data);
+            } catch (error) {
+                console.log(error);
+                setErrors({ message: 'something went wrong' });
+            }
         }
     };
 
-    const handleGoogleSuccess = async (authResponse) =>{
+    const handleGoogleSuccess = async (authResponse) => {
 
-        try{
-            const response=await axios.post('http://localhost:5000/auth/google-auth',{
-                idToken : authResponse.credential
-            },{
+        try {
+            const response = await axios.post(`${serverEndpoint}/auth/google-auth`, {
+                idToken: authResponse.credential
+            }, {
                 withCredentials: true
             });
-            updateUserDetails(response.data.user);
-             navigate("/dashboard");
 
-        }catch(e){
+            dispatch({
+                type: SET_USER,
+                payload: response.data.user
+            });
+
+            // updateUserDetails(response.data.user);
+            navigate("/dashboard");
+
+        } catch (e) {
             console.log(e);
-            setErrors({message:"Error processing the google auth, try again"})
+            setErrors({ message: "Error processing the google auth, try again" })
         }
-                    
+
     };
 
-    const handleGoogleError = async (error)=>{
+    const handleGoogleError = async (error) => {
         console.log(error);
-        setErrors({message: "Error in googl authorization flow, try again"})
+        setErrors({ message: "Error in googl authorization flow, try again" })
     }
 
     return (
@@ -119,7 +133,7 @@ function Login({updateUserDetails}) {
             </form>
             <h1>OR</h1>
             <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-                <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError}/>
+                <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
             </GoogleOAuthProvider>
         </div>
     );

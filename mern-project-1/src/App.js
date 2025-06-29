@@ -4,48 +4,59 @@ import { useEffect, useState } from "react";
 import Home from "./Home";
 import Login from "./Login";
 import AppLayout from "./layout/AppLayout";
-import Logout from "./pages/Logout";  
-import Error from "./pages/Error";  
+import Logout from "./pages/Logout";
+import Error from "./pages/Error";
 import Dashboard from "./pages/Dashboard";
 import Register from "./Register";
 import axios from "axios";
+import { serverEndpoint } from "./config";
+import { useDispatch, useSelector } from "reactredux";
+import { SET_USER } from "./redux/user/actions";
 
 function App() {
-  const [userDetails, setUserDetails] = useState(null);
-// this is example of lifting state up
-  const updateUserDetails = (updatedUserDetails) => {
-    setUserDetails(updatedUserDetails);
-  };
+  // const [userDetails, setUserDetails] = useState(null);
+  // this is example of lifting state up
+  // const updateUserDetails = (updatedUserDetails) => {
+  //   setUserDetails(updatedUserDetails);
+  // };
+
+  const dispatch = useDispatch();
+  const userDetails = useSelector((state) =>
+    state.userDetails);
 
 
   //   const isUserLoggedIn = async () => {
-//     try {
-//       const response = await axios.post(
-//         "http://localhost:5001/auth/is-user-logged-in",
-//         {},
-//         { withCredentials: true }
-//       );
-//       updateUserDetails(response.data.user);
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
-  const isUserLoggedIn = async ()=>{
-    try{
-    const response = await axios.post('http://localhost:5000/auth/isUserLoggedIn', {}, {
-      withCredentials: true // this is important to send cookies with the request
-     
-  });
-  updateUserDetails(response.data.user);
-}catch(e){
-  console.log(e);
-}
+  //     try {
+  //       const response = await axios.post(
+  //         "http://localhost:5001/auth/is-user-logged-in",
+  //         {},
+  //         { withCredentials: true }
+  //       );
+  //       updateUserDetails(response.data.user);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  const isUserLoggedIn = async () => {
+    try {
+      const response = await axios.post(`${serverEndpoint}/auth/is-user-loggedin`, {}, {
+        withCredentials: true // this is important to send cookies with the request
+
+      });
+      // updateUserDetails(response.data.user);
+      dispatch({
+        type: SET_USER,
+        payload: response.data.user
+      });
+    } catch (e) {
+      console.log(e);
+    }
   };
-  
-   useEffect(() => {
+
+  useEffect(() => {
     isUserLoggedIn();
   }, []);
- 
+
   return (
     <Routes>
       <Route
@@ -68,13 +79,13 @@ function App() {
             <Navigate to="/dashboard" />
           ) : (
             <AppLayout>
-              <Login updateUserDetails={updateUserDetails} />
+              <Login />
             </AppLayout>
           )
         }
       />
 
-     <Route
+      <Route
         path="/dashboard"
         element={
           userDetails ? (
@@ -90,14 +101,14 @@ function App() {
         path="/logout"
         element={
           userDetails ? (
-            <Logout updateUserDetails={updateUserDetails} />
+            <Logout />
           ) : (
             <Navigate to="/login" />
           )
         }
       />
 
-    <Route
+      <Route
         path="/error"
         element={
           userDetails ? (
@@ -111,21 +122,21 @@ function App() {
       />
 
       <Route
-      path="/register"
-      element={
-      userDetails ? (
-      <Navigate to="/dashboard" />
-    ) : (
-      <AppLayout>
-        <Register />
-      </AppLayout>
-    )
-  }
-/>
+        path="/register"
+        element={
+          userDetails ? (
+            <Navigate to="/dashboard" />
+          ) : (
+            <AppLayout>
+              <Register />
+            </AppLayout>
+          )
+        }
+      />
 
-   
 
-     
+
+
     </Routes>
   );
 }
@@ -140,8 +151,8 @@ export default App;
 // import Login from "./Login";
 // import AppLayout from "./layout/AppLayout";
 // import Dashboard from "./pages/Dashboard";
-// import Logout from "./pages/Logout";  
-// import Error from "./pages/Error";      
+// import Logout from "./pages/Logout";
+// import Error from "./pages/Error";
 // import axios from "axios";
 
 // function App() {
